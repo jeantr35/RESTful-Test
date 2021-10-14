@@ -156,6 +156,22 @@ class WidgetRestControllerTest {
                 .andExpect(jsonPath("$.version", is(2)));
     }
 
+    @Test
+    @DisplayName("PUT /updateWidget not success")
+    void updateWidgetNotSuccess() throws Exception {
+        // Setup our mocked service
+        var uppdatedWidget = new Widget(1l, "Widget Name", "Description", 2);
+        doReturn(Optional.empty()).when(service).findById(1L);
+        doReturn(uppdatedWidget).when(service).save(any());
+
+        // Execute the PUT request
+        mockMvc.perform(put("/rest/widget/1").header(HttpHeaders.IF_MATCH, 1)
+                        .contentType(MediaType.APPLICATION_JSON).
+                        content(asJsonString(uppdatedWidget)))
+                // Validate the response code and content type
+                .andExpect(status().isNotFound());
+    }
+
 
     static String asJsonString(final Object obj) {
         try {
