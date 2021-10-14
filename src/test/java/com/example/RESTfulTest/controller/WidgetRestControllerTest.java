@@ -129,6 +129,33 @@ class WidgetRestControllerTest {
                 .andExpect(jsonPath("$.version", is(1)));
     }
 
+    @Test
+    @DisplayName("PUT /updateWidget success")
+    void updateWidgetSuccess() throws Exception {
+        // Setup our mocked service
+        Optional<Widget> widget1 = Optional.of(new Widget(1l, "Widget Name", "Description", 1));
+        var uppdatedWidget = new Widget(1l, "Widget Name", "Description", 2);
+        doReturn(widget1).when(service).findById(1L);
+        doReturn(uppdatedWidget).when(service).save(any());
+
+        // Execute the PUT request
+        mockMvc.perform(put("/rest/widget/1").header(HttpHeaders.IF_MATCH, 1)
+                .contentType(MediaType.APPLICATION_JSON).
+                        content(asJsonString(uppdatedWidget)))
+                // Validate the response code and content type
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+
+                // Validate headers
+                .andExpect(header().string(HttpHeaders.LOCATION, "/rest/widget/1"))
+
+                // Validate the returned fields
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.name", is("Widget Name")))
+                .andExpect(jsonPath("$.description", is("Description")))
+                .andExpect(jsonPath("$.version", is(2)));
+    }
+
 
     static String asJsonString(final Object obj) {
         try {
